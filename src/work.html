@@ -1,0 +1,165 @@
+<div id="timeline-container">
+  <div id="timeline-header">
+    <div>Stuff</div>
+    <div>Goes</div>
+    <div>Here</div>
+  </div>
+  <div id="overflowhider">
+    <ul id="timeline-list">
+    </ul>
+  </div>
+
+<style>
+body {
+  font-size: 1.6em;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+#timeline-container {
+  height: 400;
+  width: 400px;
+  margin: 0px;
+  border: 2px solid darkblue;
+  border-radius: 4px;
+  background: skyblue;
+}
+#timeline-header {
+  display: flex;
+  justify-content: space-around;
+}
+#overflowhider {
+  overflow: hidden;
+  background-color: lightgrey;
+  border-top: 2px solid darkblue;
+  border-bottom: 2px solid darkblue;
+}
+#timeline-list {
+  color: red;
+  width: 100%;
+  overflow: scroll;
+  overflow-x: hidden;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 60%;
+  padding-right: 18px;
+  padding-top: 20px;
+}
+li {
+  transition: padding-left 50ms ease;
+}
+
+</style>
+
+<script>
+var listData = ['----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----', '----'];
+// Mozilla, Opera, Webkit 
+if ( document.addEventListener ) {
+  document.addEventListener( "DOMContentLoaded", function(){
+    document.removeEventListener( "DOMContentLoaded", arguments.callee, false);
+    domReady();
+  }, false );
+
+// If IE event model is used
+} else if ( document.attachEvent ) {
+  // ensure firing before onload
+  document.attachEvent("onreadystatechange", function(){
+    if ( document.readyState === "complete" ) {
+      document.detachEvent( "onreadystatechange", arguments.callee );
+      domReady();
+    }
+  });
+}
+// Stuff that gets run after the page DOM has loaded
+function domReady () {
+  console.log('READY')
+  var scrollLimit = false;
+
+  var timelineList = document.getElementById('timeline-list');
+  timelineList.addEventListener('scroll', function(event) {
+    if (scrollLimit) {
+      return;
+    }
+
+    clearTimeout(endScrollHandler);
+
+    scrollLimit = true;
+    handleScroll(event);
+
+    // Limit scroll event to happen minimum of every 100ms
+    setTimeout(function() {
+      scrollLimit = false;
+    }, 50);
+
+    // Schedule scrollHanlder to fire 100ms after scroll event stops
+    var endScrollHandler = setTimeout(function() {
+      handleScroll(event);
+    }, 50)
+  });
+
+  populateList(listData, timelineList);
+  var timelineItems = timelineList.children;
+  padListItems(timelineList, 10);
+  
+  // Set a limit for how often scroll events happen
+  
+} 
+
+
+// Helper functions in the global namespace
+function populateList(listData, listElement) {
+  listData.map(listItem => {
+    var child = document.createElement('li');
+    child.innerHTML = listItem;
+    listElement.appendChild(child);
+  })
+}
+
+function padListItems(listParent) {
+  var children = listParent.children;
+  var results = []
+  for (var i = 0; i < children.length; i++) {
+    results.push(isElementVisible(children[i]));
+  }
+  var visibleIndex = [];
+  results.forEach((result, index) => {
+    if (result) {
+      visibleIndex.push(index);
+    }
+  })
+
+  for (var i = 0; i < visibleIndex.length; i++) {
+    var child = listParent.children[visibleIndex[i]];
+    child.style.paddingLeft = (400 / visibleIndex.length) * i;
+  }
+}
+
+function handleScroll(event) {
+  var target = event.target || event.srcElement;
+  padListItems(target);
+}
+function isElementVisible(el) {
+    var rect     = el.getBoundingClientRect(),
+        vWidth   = window.innerWidth || doc.documentElement.clientWidth,
+        vHeight  = window.innerHeight || doc.documentElement.clientHeight,
+        efp      = function (x, y) { return document.elementFromPoint(x, y) };     
+
+    // Return false if it's not in the viewport
+    if (rect.right < 0 || rect.bottom < 0 
+            || rect.left > vWidth || rect.top > vHeight)
+        return false;
+
+    // Return true if any of its four corners are visible
+    return (
+          el.contains(efp(rect.left,  rect.top))
+      ||  el.contains(efp(rect.right, rect.top))
+      ||  el.contains(efp(rect.right, rect.bottom))
+      ||  el.contains(efp(rect.left,  rect.bottom))
+    );
+}
+
+
+</script>
